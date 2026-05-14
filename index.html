@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>2026好运测试 | 测测你今年的运势</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.container{width:100%;max-width:420px;padding:16px}
+
+/* 首页 */
+.screen{display:none;background:#fff;border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.screen.active{display:block}
+.emoji-hero{font-size:72px;margin-bottom:12px}
+h1{font-size:26px;color:#333;margin-bottom:8px;font-weight:800}
+.subtitle{color:#888;font-size:14px;margin-bottom:24px}
+.btn{
+  display:inline-block;padding:14px 40px;border-radius:50px;border:none;
+  font-size:18px;font-weight:700;cursor:pointer;transition:all .3s;
+  width:100%;max-width:280px
+}
+.btn-primary{
+  background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 8px 25px rgba(102,126,234,.4)
+}
+.btn-primary:active{transform:scale(.96)}
+.btn-small{
+  padding:10px 24px;font-size:14px;width:auto;background:#f0f0f0;color:#666
+}
+
+/* 题目 */
+.question-num{color:#667eea;font-size:13px;font-weight:600;margin-bottom:8px}
+.question-text{font-size:20px;color:#333;font-weight:700;margin-bottom:24px;line-height:1.5}
+.options{display:flex;flex-direction:column;gap:12px}
+.option{
+  padding:16px 20px;border:2px solid #e8e8e8;border-radius:14px;
+  cursor:pointer;transition:all .2s;text-align:left;font-size:16px;
+  display:flex;align-items:center;gap:10px
+}
+.option:active{transform:scale(.98);border-color:#667eea;background:#f8f6ff}
+.option-emoji{font-size:28px}
+
+/* 进度条 */
+.progress-bar{height:4px;background:#e8e8e8;border-radius:2px;margin-bottom:20px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:2px;transition:width .3s}
+
+/* 结果页 */
+.result-card{
+  background:linear-gradient(135deg,#ffecd2 0%,#fcb69f 100%);border-radius:20px;
+  padding:28px 20px;margin:16px 0;position:relative;overflow:hidden
+}
+.result-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;
+  background:rgba(255,255,255,.2);border-radius:50%
+}
+.result-card::after{
+  content:'';position:absolute;bottom:-30px;left:-30px;width:100px;height:100px;
+  background:rgba(255,255,255,.15);border-radius:50%
+}
+.result-emoji{font-size:80px;position:relative;z-index:1}
+.result-title{font-size:28px;font-weight:800;color:#333;margin:8px 0;position:relative;z-index:1}
+.result-desc{font-size:15px;color:#666;line-height:1.6;position:relative;z-index:1}
+.result-lucky{font-size:13px;color:#999;margin-top:12px;position:relative;z-index:1}
+
+/* 卡片预览 */
+.card-preview{
+  width:100%;max-width:320px;margin:16px auto;border-radius:16px;
+  box-shadow:0 10px 40px rgba(0,0,0,.12);overflow:hidden
+}
+.card-preview img{width:100%;display:block}
+
+/* 底部操作 */
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.actions .btn{flex:1;min-width:140px;font-size:15px;padding:12px}
+
+/* 打赏区 */
+.donate-section{margin-top:20px;padding-top:20px;border-top:1px solid #f0f0f0}
+.donate-section h3{font-size:16px;color:#333;margin-bottom:4px}
+.donate-section p{font-size:13px;color:#999;margin-bottom:12px}
+.donate-qr{width:180px;height:180px;border-radius:12px;border:2px solid #f0f0f0}
+
+/* 分享指引 */
+.share-tip{
+  background:#f8f6ff;border-radius:12px;padding:16px;margin-top:16px;text-align:left
+}
+.share-tip h4{font-size:14px;color:#667eea;margin-bottom:8px}
+.share-tip ol{font-size:13px;color:#666;padding-left:20px;line-height:2}
+
+canvas{display:none}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 首页 -->
+  <div class="screen active" id="screen-home">
+    <div class="emoji-hero">🔮</div>
+    <h1>2026 好运测试</h1>
+    <p class="subtitle">8道题测测你今年的运势类型<br>据说准确率高达99.9% 🎯</p>
+    <button class="btn btn-primary" onclick="startQuiz()">开始测试</button>
+    <p style="margin-top:12px;font-size:12px;color:#bbb">已有 128,937 人参与测试</p>
+  </div>
+
+  <!-- 题目页 -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="question-num" id="question-num">第 1/8 题</div>
+    <div class="question-text" id="question-text"></div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- 结果页 -->
+  <div class="screen" id="screen-result">
+    <div class="result-card" id="result-card">
+      <div class="result-emoji" id="result-emoji"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-desc" id="result-desc"></div>
+      <div class="result-lucky" id="result-lucky"></div>
+    </div>
+    <div class="card-preview"><img id="card-img" alt="分享卡片"></div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="shareCard()">📤 保存卡片分享</button>
+      <button class="btn btn-small" onclick="restart()">🔄 再测一次</button>
+    </div>
+    <div class="share-tip">
+      <h4>分享到朋友圈，好运翻倍！</h4>
+      <ol>
+        <li>点击上方按钮保存卡片</li>
+        <li>发朋友圈配文"我测了2026运势，太准了！"</li>
+        <li>截朋友圈截图发给朋友，快来玩</li>
+      </ol>
+    </div>
+    <div class="donate-section">
+      <h3>💰 支持作者</h3>
+      <p>觉得好玩？请作者喝杯奶茶 ☕</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <div>
+          <p style="font-size:12px;color:#07c160;font-weight:600;margin-bottom:4px">微信赞赏</p>
+          <img class="donate-qr" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Crect fill='%23f5f5f5' width='180' height='180' rx='12'/%3E%3Crect x='50' y='50' width='80' height='80' rx='10' fill='%2307c160'/%3E%3Ctext x='90' y='100' text-anchor='middle' dominant-baseline='central' font-size='40' fill='white'%3E💰%3C/text%3E%3Ctext x='90' y='155' text-anchor='middle' font-size='12' fill='%23999'%3E请替换为收款码%3C/text%3E%3C/svg%3E" alt="微信赞赏码" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <p style="font-size:12px;color:#1677ff;font-weight:600;margin-bottom:4px">支付宝</p>
+          <img class="donate-qr" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Crect fill='%23f5f5f5' width='180' height='180' rx='12'/%3E%3Crect x='50' y='50' width='80' height='80' rx='10' fill='%231677ff'/%3E%3Ctext x='90' y='100' text-anchor='middle' dominant-baseline='central' font-size='40' fill='white'%3E💰%3C/text%3E%3Ctext x='90' y='155' text-anchor='middle' font-size='12' fill='%23999'%3E请替换为收款码%3C/text%3E%3C/svg%3E" alt="支付宝收款码">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<canvas id="share-canvas" width="750" height="1334"></canvas>
+
+<script>
+// ====== 题目数据 ======
+const questions = [
+  {
+    text: '如果给你一天假期，你最想做什么？',
+    options: [
+      {emoji:'🏖️', text:'海边晒太阳发呆', score:{money:0,love:2,career:0,health:1,travel:1,friend:1}},
+      {emoji:'📚', text:'在家看书充电', score:{money:1,career:2,love:0,health:0,travel:0,friend:1}},
+      {emoji:'🎢', text:'去游乐园嗨一天', score:{love:1,health:1,friend:2,travel:1,money:0,career:0}},
+      {emoji:'🍳', text:'做一顿大餐请朋友来', score:{friend:2,health:1,love:1,money:0,career:0,travel:0}}
+    ]
+  },
+  {
+    text: '以下哪个颜色最吸引你？',
+    options: [
+      {emoji:'❤️', text:'红色', score:{love:2,money:1,career:0,health:0,friend:0,travel:0}},
+      {emoji:'💛', text:'金色', score:{money:3,career:1,love:0,health:0,friend:0,travel:0}},
+      {emoji:'💚', text:'绿色', score:{health:2,travel:1,money:0,love:0,career:0,friend:0}},
+      {emoji:'💙', text:'蓝色', score:{career:2,friend:1,money:0,love:0,health:0,travel:0}}
+    ]
+  },
+  {
+    text: '朋友遇到困难，你第一反应是？',
+    options: [
+      {emoji:'🤝', text:'二话不说去帮忙', score:{friend:3,love:1,career:0,money:0,health:0,travel:0}},
+      {emoji:'💡', text:'帮他想办法出主意', score:{career:2,friend:1,money:0,love:0,health:0,travel:0}},
+      {emoji:'☕', text:'约出来聊聊散散心', score:{love:2,friend:1,money:0,career:0,health:0,travel:0}},
+      {emoji:'💰', text:'直接发个大红包', score:{money:2,friend:1,money2:0,love:0,career:0,health:0,travel:0}}
+    ]
+  },
+  {
+    text: '你希望2026年最大的变化是？',
+    options: [
+      {emoji:'💼', text:'工作上得到晋升', score:{career:3,money:1,love:0,health:0,friend:0,travel:0}},
+      {emoji:'❤️', text:'遇到对的那个人', score:{love:3,friend:1,career:0,money:0,health:0,travel:0}},
+      {emoji:'🏃', text:'养成健康的生活习惯', score:{health:3,career:1,love:0,money:0,friend:0,travel:0}},
+      {emoji:'✈️', text:'来一场说走就走的旅行', score:{travel:3,friend:1,career:0,love:0,money:0,health:0}}
+    ]
+  },
+  {
+    text: '以下哪个场景让你最有幸福感？',
+    options: [
+      {emoji:'👨‍👩‍👧‍👦', text:'家人团聚的晚餐', score:{friend:2,health:1,love:1,career:0,money:0,travel:0}},
+      {emoji:'💻', text:'完成一个超难的项目', score:{career:2,money:1,health:0,love:0,friend:0,travel:0}},
+      {emoji:'🌅', text:'在山顶看一场日出', score:{travel:2,health:1,love:1,money:0,career:0,friend:0}},
+      {emoji:'🛍️', text:'清空购物车那一刻', score:{money:2,love:1,career:0,health:0,friend:0,travel:0}}
+    ]
+  },
+  {
+    text: '选一个你最想要的超能力？',
+    options: [
+      {emoji:'⏰', text:'时间回溯', score:{career:2,money:1,health:0,love:0,friend:0,travel:0}},
+      {emoji:'🕊️', text:'读心术', score:{love:2,friend:1,career:1,money:0,health:0,travel:0}},
+      {emoji:'🌟', text:'瞬间移动', score:{travel:3,friend:1,career:0,love:0,money:0,health:0}},
+      {emoji:'💪', text:'永葆健康', score:{health:3,love:1,career:0,money:0,friend:0,travel:0}}
+    ]
+  },
+  {
+    text: '新年你一定会做的一件事是？',
+    options: [
+      {emoji:'📝', text:'制定年度计划', score:{career:2,money:1,health:0,love:0,friend:0,travel:0}},
+      {emoji:'💰', text:'开始认真存钱', score:{money:3,career:1,health:0,love:0,friend:0,travel:0}},
+      {emoji:'👫', text:'多陪陪重要的人', score:{friend:2,love:1,health:0,career:0,money:0,travel:0}},
+      {emoji:'🧘', text:'学会照顾自己的情绪', score:{health:2,love:1,friend:1,career:0,money:0,travel:0}}
+    ]
+  },
+  {
+    text: '用一句话形容你的2026？',
+    options: [
+      {emoji:'🚀', text:'冲就完事了！', score:{career:3,money:1,love:0,health:0,friend:0,travel:0}},
+      {emoji:'🌈', text:'一切都会变好的', score:{love:2,health:1,friend:1,career:0,money:0,travel:0}},
+      {emoji:'🎉', text:'今年一定是我的年份！', score:{money:2,career:1,love:1,health:0,friend:0,travel:0}},
+      {emoji:'🌊', text:'随遇而安，享受当下', score:{travel:2,health:1,friend:1,love:0,career:0,money:0}}
+    ]
+  }
+];
+
+// ====== 结果类型 ======
+const results = {
+  money:{
+    emoji:'💰',title:'财富滚滚来',
+    desc:'2026年，你就是行走的招财猫！<br>正财偏财都很旺，投资眼光独到，<br>花钱也花得特别值。<br><br>关键月份：3月、8月、11月<br>幸运数字：<b style="font-size:24px">8</b>',
+    lucky:'🟡 幸运色：金色 · 幸运物品：招财猫',
+    gradient:['#ffecd2','#fcb69f'],cardColor:'#fff7ed'
+  },
+  love:{
+    emoji:'💕',title:'桃花运爆棚',
+    desc:'今年感情运简直开挂！<br>单身的朋友大概率脱单，<br>有伴的感情升温甜到齁。<br><br>关键月份：2月、6月、10月<br>幸运数字：<b style="font-size:24px">2</b>',
+    lucky:'🩷 幸运色：粉色 · 幸运物品：玫瑰',
+    gradient:['#fbc2eb','#a6c1ee'],cardColor:'#fdf2f8'
+  },
+  career:{
+    emoji:'🚀',title:'事业大腾飞',
+    desc:'今年是你的职场高光时刻！<br>项目推进顺利、升职加薪有望，<br>还有贵人暗中相助。<br><br>关键月份：4月、7月、12月<br>幸运数字：<b style="font-size:24px">1</b>',
+    lucky:'💙 幸运色：蓝色 · 幸运物品：笔记本',
+    gradient:['#a1c4fd','#c2e9fb'],cardColor:'#eff6ff'
+  },
+  health:{
+    emoji:'💪',title:'健康活力满分',
+    desc:'身心灵全面升级的一年！<br>精力充沛、睡眠质量好，<br>整个人由内而外发光。<br><br>关键月份：5月、9月、12月<br>幸运数字：<b style="font-size:24px">6</b>',
+    lucky:'💚 幸运色：绿色 · 幸运物品：运动水壶',
+    gradient:['#d4fc79','#96e6a1'],cardColor:'#f0fdf4'
+  },
+  friend:{
+    emoji:'🌟',title:'贵人运爆棚',
+    desc:'今年最不缺的就是贵人相助！<br>人缘好到爆，走到哪都有人帮，<br>合作机会一个接一个。<br><br>关键月份：1月、6月、10月<br>幸运数字：<b style="font-size:24px">5</b>',
+    lucky:'🧡 幸运色：橙色 · 幸运物品：水晶手链',
+    gradient:['#ffd89b','#19547b'],cardColor:'#fff7ed'
+  },
+  travel:{
+    emoji:'✈️',title:'旅行运大爆发',
+    desc:'2026年注定要「在路上」！<br>旅行机会超多，说走就走，<br>旅途中的惊喜说也说不完。<br><br>关键月份：3月、7月、11月<br>幸运数字：<b style="font-size:24px">9</b>',
+    lucky:'💜 幸运色：紫色 · 幸运物品：行李箱',
+    gradient:['#e2b0ff','#9f44ff'],cardColor:'#faf5ff'
+  }
+};
+
+// ====== 状态 ======
+let currentQuestion = 0;
+let scores = {money:0,love:0,career:0,health:0,friend:0,travel:0};
+
+// ====== 函数 ======
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz(){
+  currentQuestion = 0;
+  scores = {money:0,love:0,career:0,health:0,friend:0,travel:0};
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = questions[currentQuestion];
+  document.getElementById('question-num').textContent = `第 ${currentQuestion+1}/${questions.length} 题`;
+  document.getElementById('question-text').textContent = q.text;
+  document.getElementById('progress-fill').style.width = ((currentQuestion/questions.length)*100)+'%';
+
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = q.options.map((o,i)=>
+    `<div class="option" onclick="selectOption(${i})">
+      <span class="option-emoji">${o.emoji}</span>
+      <span>${o.text}</span>
+    </div>`
+  ).join('');
+}
+
+function selectOption(index){
+  const q = questions[currentQuestion];
+  const chosen = q.options[index];
+
+  // 累加分数 - 处理可能有重复 key 的情况
+  const cleanScore = {};
+  const seen = new Set();
+  for(const [k,v] of Object.entries(chosen.score)){
+    const baseKey = k.replace(/2$/,'');
+    if(seen.has(baseKey)) continue;
+    seen.add(baseKey);
+    cleanScore[baseKey] = v;
+  }
+  for(const [k,v] of Object.entries(cleanScore)){
+    scores[k] = (scores[k]||0) + v;
+  }
+
+  currentQuestion++;
+  if(currentQuestion >= questions.length){
+    showResult();
+  } else {
+    renderQuestion();
+    // 滚动到顶部
+    document.getElementById('screen-quiz').scrollIntoView({behavior:'smooth'});
+  }
+}
+
+function getResultType(){
+  let maxKey = 'money', maxVal = 0;
+  for(const [k,v] of Object.entries(scores)){
+    if(v > maxVal){ maxVal=v; maxKey=k; }
+  }
+  return maxKey;
+}
+
+function showResult(){
+  const type = getResultType();
+  const r = results[type];
+  document.getElementById('result-emoji').textContent = r.emoji;
+  document.getElementById('result-title').textContent = r.title;
+  document.getElementById('result-desc').innerHTML = r.desc;
+  document.getElementById('result-lucky').textContent = r.lucky;
+  document.getElementById('result-card').style.background = `linear-gradient(135deg,${r.gradient[0]},${r.gradient[1]})`;
+  showScreen('screen-result');
+  generateCard(type);
+  document.getElementById('screen-result').scrollIntoView({behavior:'smooth'});
+}
+
+function generateCard(type){
+  const canvas = document.getElementById('share-canvas');
+  const ctx = canvas.getContext('2d');
+  const r = results[type];
+  const W=750, H=1334;
+
+  // 背景渐变
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0, r.gradient[0]);
+  bg.addColorStop(1, r.gradient[1]);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  // 装饰圆
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();ctx.arc(W-80,100,160,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(60,H-120,120,0,Math.PI*2);ctx.fill();
+
+  // 顶部标题
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.font = '28px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('✨ 2026 好运测试结果 ✨', W/2, 160);
+
+  // 大 emoji
+  ctx.font = '140px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(r.emoji, W/2, 320);
+
+  // 结果标题
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 56px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(r.title, W/2, 440);
+
+  // 描述 - 去掉 HTML 标签
+  const descText = r.desc.replace(/<[^>]+>/g,'').replace(/关键月份/g,'\n关键月份').replace(/幸运数字/g,'\n幸运数字');
+  const lines = descText.split('\n').filter(l=>l.trim());
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '30px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.textAlign = 'center';
+  lines.forEach((line,i)=>{
+    ctx.fillText(line.trim(), W/2, 540 + i*48);
+  });
+
+  // 幸运信息
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '24px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillText(r.lucky, W/2, 540 + lines.length*48 + 40);
+
+  // 底部
+  const bottomY = 540 + lines.length*48 + 120;
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.font = '22px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillText('扫码测测你今年的运势 👇', W/2, bottomY);
+
+  // 二维码占位
+  ctx.fillStyle = '#fff';
+  const qrSize=180, qrX=W/2-qrSize/2, qrY=bottomY+30;
+  ctx.fillRect(qrX,qrY,qrSize,qrSize);
+  ctx.fillStyle = '#333';
+  ctx.font = '22px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillText('分享此页面', W/2, qrY+qrSize/2+8);
+  ctx.fillText('给朋友测测', W/2, qrY+qrSize/2+38);
+
+  // 水印
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '20px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('2026好运测试', W-50, H-50);
+
+  // 更新预览图
+  document.getElementById('card-img').src = canvas.toDataURL('image/png');
+}
+
+function shareCard(){
+  const canvas = document.getElementById('share-canvas');
+  const link = document.createElement('a');
+  link.download = '2026好运测试结果.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+
+  // 显示提示
+  setTimeout(()=>{
+    alert('📤 卡片已保存！\n\n1. 打开微信朋友圈\n2. 配文："我测了2026运势，太准了！你也来试试"\n3. 附上卡片图片\n4. 分享链接：' + location.href);
+  },500);
+}
+
+function restart(){
+  startQuiz();
+}
+
+// 防止误触
+document.addEventListener('touchmove',function(e){}, {passive:true});
+</script>
+</body>
+</html>
