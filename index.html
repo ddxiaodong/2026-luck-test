@@ -360,6 +360,23 @@ function showResult(){
   document.getElementById('screen-result').scrollIntoView({behavior:'smooth'});
 }
 
+function wrapText(ctx, text, maxWidth){
+  const chars = [...text];
+  const lines = [];
+  let line = '';
+  for(const ch of chars){
+    const test = line + ch;
+    if(ctx.measureText(test).width > maxWidth && line.length > 0){
+      lines.push(line);
+      line = ch;
+    } else {
+      line = test;
+    }
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+
 function generateCard(type){
   const canvas = document.getElementById('share-canvas');
   const ctx = canvas.getContext('2d');
@@ -379,7 +396,7 @@ function generateCard(type){
   ctx.beginPath();ctx.arc(60,H-120,120,0,Math.PI*2);ctx.fill();
 
   // 顶部标题
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
   ctx.font = '28px -apple-system,BlinkMacSystemFont,sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('✨ 2026 好运测试结果 ✨', W/2, 160);
@@ -389,30 +406,39 @@ function generateCard(type){
   ctx.textAlign = 'center';
   ctx.fillText(r.emoji, W/2, 320);
 
-  // 结果标题
-  ctx.fillStyle = '#fff';
+  // 结果标题 - 深色加浅色阴影
+  ctx.fillStyle = '#2d2d2d';
   ctx.font = 'bold 56px -apple-system,BlinkMacSystemFont,sans-serif';
   ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(255,255,255,0.4)';
+  ctx.shadowBlur = 8;
   ctx.fillText(r.title, W/2, 440);
+  ctx.shadowBlur = 0;
 
-  // 描述 - 去掉 HTML 标签
+  // 描述 - 自动换行，深色文字
   const descText = r.desc.replace(/<[^>]+>/g,'').replace(/关键月份/g,'\n关键月份').replace(/幸运数字/g,'\n幸运数字');
-  const lines = descText.split('\n').filter(l=>l.trim());
-  ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.font = '30px -apple-system,BlinkMacSystemFont,sans-serif';
+  const rawLines = descText.split('\n').filter(l=>l.trim());
+  ctx.font = '26px -apple-system,BlinkMacSystemFont,sans-serif';
   ctx.textAlign = 'center';
-  lines.forEach((line,i)=>{
-    ctx.fillText(line.trim(), W/2, 540 + i*48);
+  ctx.fillStyle = '#3a3a3a';
+  const lineHeight = 40;
+  let allLines = [];
+  for(const raw of rawLines){
+    const wrapped = wrapText(ctx, raw.trim(), W - 80);
+    allLines = allLines.concat(wrapped);
+  }
+  allLines.forEach((line,i)=>{
+    ctx.fillText(line, W/2, 540 + i*lineHeight);
   });
 
   // 幸运信息
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '24px -apple-system,BlinkMacSystemFont,sans-serif';
-  ctx.fillText(r.lucky, W/2, 540 + lines.length*48 + 40);
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.font = '22px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillText(r.lucky, W/2, 540 + allLines.length*lineHeight + 36);
 
   // 底部
-  const bottomY = 540 + lines.length*48 + 120;
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  const bottomY = 540 + allLines.length*lineHeight + 100;
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
   ctx.font = '22px -apple-system,BlinkMacSystemFont,sans-serif';
   ctx.fillText('扫码测测你今年的运势 👇', W/2, bottomY);
 
