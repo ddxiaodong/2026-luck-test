@@ -407,23 +407,23 @@ function generateCard(type){
   ctx.font = '22px -apple-system,BlinkMacSystemFont,sans-serif';
   ctx.fillText('扫码测测你今年的运势 👇', W/2, bottomY);
 
-  // 二维码占位
-  ctx.fillStyle = '#fff';
+  // 二维码
   const qrSize=180, qrX=W/2-qrSize/2, qrY=bottomY+30;
-  ctx.fillRect(qrX,qrY,qrSize,qrSize);
-  ctx.fillStyle = '#333';
-  ctx.font = '22px -apple-system,BlinkMacSystemFont,sans-serif';
-  ctx.fillText('分享此页面', W/2, qrY+qrSize/2+8);
-  ctx.fillText('给朋友测测', W/2, qrY+qrSize/2+38);
+  const qrImg = new Image();
+  qrImg.onload = function(){
+    // 白色背景
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(qrX-8, qrY-8, qrSize+16, qrSize+16);
+    ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+    document.getElementById('card-img').src = canvas.toDataURL('image/png');
+  };
+  qrImg.src = 'site-qr.png';
 
   // 水印
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.font = '20px -apple-system,BlinkMacSystemFont,sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText('2026好运测试', W-50, H-50);
-
-  // 更新预览图
-  document.getElementById('card-img').src = canvas.toDataURL('image/png');
 }
 
 function shareCard(){
